@@ -4,7 +4,7 @@ A browser-based phishing awareness training tool that teaches users how to spot 
 
 ## Live Demo
 
-🔗 [https://YOUR_USERNAME.github.io/Phishing-Simulator/](https://nessa360.github.io/Phishing-Simulator/)
+🔗 (https://nessa360.github.io/Phishing-Simulator/)
 
 ---
 
