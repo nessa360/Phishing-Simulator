@@ -1,0 +1,1012 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PhishGuard — Phishing Awareness Simulator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@400;500&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0e17;
+    --bg2: #111827;
+    --bg3: #1a2335;
+    --border: rgba(255,255,255,0.08);
+    --border2: rgba(255,255,255,0.15);
+    --text: #f0f4ff;
+    --muted: #8892a4;
+    --accent: #3b82f6;
+    --accent2: #60a5fa;
+    --danger: #ef4444;
+    --danger-bg: rgba(239,68,68,0.12);
+    --success: #22c55e;
+    --success-bg: rgba(34,197,94,0.12);
+    --warn: #f59e0b;
+    --warn-bg: rgba(245,158,11,0.12);
+    --pill-r: 6px;
+    --card-r: 14px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  /* ── HEADER ── */
+  header {
+    border-bottom: 1px solid var(--border);
+    padding: 18px 32px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    position: sticky;
+    top: 0;
+    background: rgba(10,14,23,0.92);
+    backdrop-filter: blur(12px);
+    z-index: 100;
+  }
+  .logo {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 20px;
+    letter-spacing: -0.5px;
+    color: var(--text);
+  }
+  .logo span { color: var(--accent2); }
+  .header-right {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .score-pill {
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    background: var(--bg3);
+    border: 1px solid var(--border2);
+    padding: 5px 14px;
+    border-radius: 20px;
+    display: none;
+  }
+
+  /* ── NAV TABS ── */
+  .tabs {
+    display: flex;
+    gap: 0;
+    border-bottom: 1px solid var(--border);
+    padding: 0 32px;
+    background: var(--bg);
+  }
+  .tab-btn {
+    background: none;
+    border: none;
+    color: var(--muted);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    padding: 14px 20px;
+    cursor: pointer;
+    position: relative;
+    transition: color 0.2s;
+  }
+  .tab-btn:hover { color: var(--text); }
+  .tab-btn.active {
+    color: var(--accent2);
+  }
+  .tab-btn.active::after {
+    content: '';
+    position: absolute;
+    bottom: -1px;
+    left: 0; right: 0;
+    height: 2px;
+    background: var(--accent2);
+    border-radius: 2px 2px 0 0;
+  }
+
+  /* ── SECTIONS ── */
+  .section { display: none; padding: 40px 32px; max-width: 860px; margin: 0 auto; }
+  .section.active { display: block; }
+
+  /* ── TRAINING ── */
+  .section-title {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 28px;
+    letter-spacing: -0.5px;
+    margin-bottom: 8px;
+  }
+  .section-sub {
+    color: var(--muted);
+    font-size: 15px;
+    margin-bottom: 32px;
+  }
+  .tip-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 16px;
+  }
+  .tip-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--card-r);
+    padding: 22px;
+    transition: border-color 0.2s;
+  }
+  .tip-card:hover { border-color: var(--border2); }
+  .tip-icon {
+    font-size: 26px;
+    margin-bottom: 12px;
+  }
+  .tip-title {
+    font-family: 'Syne', sans-serif;
+    font-weight: 600;
+    font-size: 15px;
+    margin-bottom: 8px;
+    color: var(--text);
+  }
+  .tip-text {
+    font-size: 13.5px;
+    color: var(--muted);
+    line-height: 1.65;
+  }
+  .tip-example {
+    margin-top: 10px;
+    background: var(--bg3);
+    border-radius: var(--pill-r);
+    padding: 8px 12px;
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    color: var(--warn);
+    word-break: break-all;
+  }
+  .start-btn {
+    margin-top: 36px;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--accent);
+    color: #fff;
+    font-family: 'Syne', sans-serif;
+    font-weight: 600;
+    font-size: 15px;
+    border: none;
+    border-radius: 8px;
+    padding: 13px 28px;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.1s;
+  }
+  .start-btn:hover { background: var(--accent2); transform: translateY(-1px); }
+  .start-btn:active { transform: translateY(0); }
+
+  /* ── SIMULATOR ── */
+  .sim-progress {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 28px;
+  }
+  .progress-bar-wrap {
+    flex: 1;
+    height: 4px;
+    background: var(--bg3);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  .progress-bar-fill {
+    height: 100%;
+    background: var(--accent2);
+    border-radius: 4px;
+    transition: width 0.4s ease;
+  }
+  .progress-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    color: var(--muted);
+    white-space: nowrap;
+  }
+
+  /* email card */
+  .email-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--card-r);
+    overflow: hidden;
+    margin-bottom: 24px;
+    animation: fadeSlide 0.35s ease;
+  }
+  @keyframes fadeSlide {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .email-header {
+    background: var(--bg3);
+    border-bottom: 1px solid var(--border);
+    padding: 18px 22px;
+  }
+  .email-meta {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 4px 12px;
+    font-size: 13px;
+  }
+  .email-meta .label { color: var(--muted); font-weight: 500; }
+  .email-meta .value { color: var(--text); font-family: 'DM Mono', monospace; font-size: 12.5px; }
+  .email-subject {
+    font-family: 'Syne', sans-serif;
+    font-weight: 600;
+    font-size: 17px;
+    margin-bottom: 14px;
+  }
+  .email-body {
+    padding: 22px;
+    font-size: 14.5px;
+    line-height: 1.75;
+    color: #c8d0e0;
+    white-space: pre-wrap;
+  }
+  .email-link {
+    display: inline-block;
+    margin-top: 4px;
+    color: var(--accent2);
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    text-decoration: underline;
+    cursor: default;
+    word-break: break-all;
+  }
+  .email-attachment {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    margin-top: 14px;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: var(--pill-r);
+    padding: 6px 12px;
+    font-size: 13px;
+    color: var(--muted);
+  }
+
+  /* decision buttons */
+  .decision-wrap {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .decision-btn {
+    flex: 1;
+    min-width: 180px;
+    padding: 14px 20px;
+    border-radius: 8px;
+    border: 1.5px solid var(--border2);
+    background: transparent;
+    font-family: 'Syne', sans-serif;
+    font-weight: 600;
+    font-size: 15px;
+    cursor: pointer;
+    transition: all 0.18s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+  }
+  .decision-btn.phish {
+    color: var(--danger);
+    border-color: rgba(239,68,68,0.35);
+  }
+  .decision-btn.phish:hover {
+    background: var(--danger-bg);
+    border-color: var(--danger);
+  }
+  .decision-btn.legit {
+    color: var(--success);
+    border-color: rgba(34,197,94,0.35);
+  }
+  .decision-btn.legit:hover {
+    background: var(--success-bg);
+    border-color: var(--success);
+  }
+  .decision-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+
+  /* feedback */
+  .feedback-box {
+    display: none;
+    margin-top: 20px;
+    border-radius: 10px;
+    padding: 18px 20px;
+    border: 1px solid;
+    animation: fadeSlide 0.3s ease;
+  }
+  .feedback-box.show { display: block; }
+  .feedback-box.correct {
+    background: var(--success-bg);
+    border-color: rgba(34,197,94,0.4);
+  }
+  .feedback-box.wrong {
+    background: var(--danger-bg);
+    border-color: rgba(239,68,68,0.4);
+  }
+  .feedback-verdict {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 16px;
+    margin-bottom: 8px;
+  }
+  .feedback-verdict.correct { color: var(--success); }
+  .feedback-verdict.wrong   { color: var(--danger); }
+  .feedback-detail {
+    font-size: 13.5px;
+    color: #c8d0e0;
+    line-height: 1.65;
+  }
+  .red-flags {
+    margin-top: 10px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+  }
+  .flag-tag {
+    background: rgba(245,158,11,0.15);
+    border: 1px solid rgba(245,158,11,0.3);
+    color: var(--warn);
+    border-radius: var(--pill-r);
+    font-size: 12px;
+    padding: 3px 10px;
+    font-weight: 500;
+  }
+  .next-btn {
+    margin-top: 20px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--bg3);
+    border: 1px solid var(--border2);
+    color: var(--text);
+    font-family: 'Syne', sans-serif;
+    font-weight: 600;
+    font-size: 14px;
+    padding: 11px 22px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .next-btn:hover { background: var(--bg2); border-color: var(--accent2); }
+
+  /* ── RESULTS ── */
+  .results-hero {
+    text-align: center;
+    padding: 40px 0 32px;
+  }
+  .score-ring-wrap {
+    position: relative;
+    width: 140px;
+    height: 140px;
+    margin: 0 auto 24px;
+  }
+  .score-ring-wrap svg { transform: rotate(-90deg); }
+  .score-center {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+  .score-number {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 32px;
+    line-height: 1;
+  }
+  .score-denom {
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 2px;
+  }
+  .score-msg {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 22px;
+    margin-bottom: 6px;
+  }
+  .score-sub {
+    color: var(--muted);
+    font-size: 14px;
+  }
+  .stats-row {
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+    margin-top: 28px;
+    flex-wrap: wrap;
+  }
+  .stat-box {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 18px 28px;
+    text-align: center;
+    min-width: 120px;
+  }
+  .stat-n {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 26px;
+  }
+  .stat-n.green { color: var(--success); }
+  .stat-n.red   { color: var(--danger); }
+  .stat-l {
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 3px;
+  }
+  .review-title {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 18px;
+    margin: 36px 0 16px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border);
+  }
+  .review-item {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px 18px;
+    margin-bottom: 12px;
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+  }
+  .review-icon { font-size: 20px; flex-shrink: 0; margin-top: 1px; }
+  .review-subject {
+    font-weight: 500;
+    font-size: 14px;
+    margin-bottom: 4px;
+  }
+  .review-note {
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.55;
+  }
+  .badge {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 4px;
+    margin-left: 8px;
+    vertical-align: middle;
+  }
+  .badge.phish { background: var(--danger-bg); color: var(--danger); }
+  .badge.legit { background: var(--success-bg); color: var(--success); }
+  .retry-btn {
+    margin-top: 32px;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--accent);
+    color: #fff;
+    font-family: 'Syne', sans-serif;
+    font-weight: 600;
+    font-size: 15px;
+    border: none;
+    border-radius: 8px;
+    padding: 13px 28px;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .retry-btn:hover { background: var(--accent2); }
+  .results-actions { text-align: center; margin-top: 8px; }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 600px) {
+    header { padding: 14px 16px; }
+    .tabs  { padding: 0 16px; }
+    .section { padding: 28px 16px; }
+    .tab-btn { padding: 12px 14px; font-size: 13px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">Phish<span>Guard</span></div>
+  <div class="header-right">
+    <div class="score-pill" id="scorePill">Score: <span id="liveScore">0</span>/10</div>
+  </div>
+</header>
+
+<nav class="tabs">
+  <button class="tab-btn active" onclick="showTab('training')">🎓 Training</button>
+  <button class="tab-btn" onclick="showTab('simulator')">📧 Simulator</button>
+  <button class="tab-btn" onclick="showTab('results')">📊 Results</button>
+</nav>
+
+<!-- ═══════════════ TRAINING ═══════════════ -->
+<section class="section active" id="tab-training">
+  <div class="section-title">Know Before You Click</div>
+  <div class="section-sub">Learn the 6 most common phishing red flags before testing your skills.</div>
+
+  <div class="tip-grid">
+    <div class="tip-card">
+      <div class="tip-icon">🔗</div>
+      <div class="tip-title">Suspicious URLs</div>
+      <div class="tip-text">Phishers mimic real domains with subtle typos or extra subdomains. Always hover to preview links before clicking.</div>
+      <div class="tip-example">secure-paypal.com.verify-account.net</div>
+    </div>
+    <div class="tip-card">
+      <div class="tip-icon">📮</div>
+      <div class="tip-title">Mismatched Sender</div>
+      <div class="tip-text">The display name may say "Apple Support" but the actual email address is from a random domain.</div>
+      <div class="tip-example">Apple Support &lt;noreply@apple-account-update.xyz&gt;</div>
+    </div>
+    <div class="tip-card">
+      <div class="tip-icon">⏰</div>
+      <div class="tip-title">Urgency & Fear Tactics</div>
+      <div class="tip-text">Phrases like "Your account will be suspended in 24 hours!" are designed to bypass your rational thinking and make you act fast.</div>
+      <div class="tip-example">"ACT NOW — verify immediately or lose access!"</div>
+    </div>
+    <div class="tip-card">
+      <div class="tip-icon">🎁</div>
+      <div class="tip-title">Too-Good-To-Be-True Offers</div>
+      <div class="tip-text">Winning a lottery you never entered, or a surprise refund — if it sounds too good to be true, it almost certainly is.</div>
+      <div class="tip-example">"You've been selected for a $1,000 Amazon gift card!"</div>
+    </div>
+    <div class="tip-card">
+      <div class="tip-icon">📎</div>
+      <div class="tip-title">Unexpected Attachments</div>
+      <div class="tip-text">Malware is often hidden in .zip, .exe, or even Office files. Legitimate services rarely send unsolicited attachments.</div>
+      <div class="tip-example">invoice_unpaid_FINAL.zip · document_scan.exe</div>
+    </div>
+    <div class="tip-card">
+      <div class="tip-icon">✍️</div>
+      <div class="tip-title">Poor Grammar & Formatting</div>
+      <div class="tip-text">Mass phishing emails often contain spelling mistakes, awkward phrasing, or inconsistent formatting that legitimate companies avoid.</div>
+      <div class="tip-example">"Dear Costumer, you're account need verify."</div>
+    </div>
+  </div>
+
+  <button class="start-btn" onclick="startSimulator()">
+    Start the Simulator →
+  </button>
+</section>
+
+<!-- ═══════════════ SIMULATOR ═══════════════ -->
+<section class="section" id="tab-simulator">
+  <div class="sim-progress">
+    <span class="progress-label" id="progressLabel">Email 1 of 10</span>
+    <div class="progress-bar-wrap">
+      <div class="progress-bar-fill" id="progressFill" style="width:10%"></div>
+    </div>
+  </div>
+
+  <div id="emailDisplay"></div>
+
+  <div class="decision-wrap" id="decisionWrap">
+    <button class="decision-btn phish" id="btnPhish" onclick="answer('phish')">🚨 This is Phishing</button>
+    <button class="decision-btn legit" id="btnLegit" onclick="answer('legit')">✅ Looks Legitimate</button>
+  </div>
+
+  <div class="feedback-box" id="feedbackBox">
+    <div class="feedback-verdict" id="feedbackVerdict"></div>
+    <div class="feedback-detail" id="feedbackDetail"></div>
+    <div class="red-flags" id="redFlags"></div>
+    <button class="next-btn" id="nextBtn" onclick="nextEmail()">Next Email →</button>
+  </div>
+</section>
+
+<!-- ═══════════════ RESULTS ═══════════════ -->
+<section class="section" id="tab-results">
+  <div class="results-hero">
+    <div class="score-ring-wrap">
+      <svg width="140" height="140" viewBox="0 0 140 140">
+        <circle cx="70" cy="70" r="58" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="10"/>
+        <circle cx="70" cy="70" r="58" fill="none" stroke="var(--accent2)" stroke-width="10"
+          stroke-dasharray="364.4" stroke-dashoffset="364.4"
+          stroke-linecap="round" id="ringArc" style="transition: stroke-dashoffset 1s ease"/>
+      </svg>
+      <div class="score-center">
+        <div class="score-number" id="finalScore">0</div>
+        <div class="score-denom">/ 10</div>
+      </div>
+    </div>
+    <div class="score-msg" id="scoreMsg">—</div>
+    <div class="score-sub" id="scoreSub">Complete the simulator to see your results.</div>
+    <div class="stats-row">
+      <div class="stat-box">
+        <div class="stat-n green" id="statCorrect">—</div>
+        <div class="stat-l">Correct</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-n red" id="statWrong">—</div>
+        <div class="stat-l">Missed</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-n" id="statPct" style="color:var(--accent2)">—</div>
+        <div class="stat-l">Accuracy</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="review-title">Email Review</div>
+  <div id="reviewList"></div>
+
+  <div class="results-actions">
+    <button class="retry-btn" onclick="resetSimulator()">🔄 Try Again</button>
+  </div>
+</section>
+
+<script>
+const EMAILS = [
+  {
+    id: 1,
+    from_name: "PayPal Security",
+    from_addr: "security@paypa1-alerts.com",
+    to: "you@example.com",
+    subject: "⚠️ Your PayPal account has been limited",
+    body: `Dear Customer,
+
+We have noticed some unusual activity on your PayPal account. To protect you, we have temporarily limited your account access.
+
+Please verify your information immediately to restore full access. Failure to do so within 24 hours will result in permanent suspension.
+
+Click the link below to verify:`,
+    link: "http://paypal-secure-verify.account-check.net/login",
+    attachment: null,
+    type: "phish",
+    explanation: "The sender domain is 'paypa1-alerts.com' — note the number 1 instead of the letter L. PayPal always uses @paypal.com. Combined with the urgency tactic and suspicious URL, this is a classic phishing attempt.",
+    flags: ["Misspelled domain (paypa1)", "Suspicious URL not on paypal.com", "Urgency / threat of suspension", "Generic 'Dear Customer'"]
+  },
+  {
+    id: 2,
+    from_name: "GitHub",
+    from_addr: "noreply@github.com",
+    to: "you@example.com",
+    subject: "[GitHub] Please verify your email address",
+    body: `Hey there,
+
+A GitHub account was recently created with this email address. If this was you, please confirm your email address by clicking the button below.
+
+If you didn't sign up for a GitHub account, you can ignore this email.
+
+This link expires in 3 days.`,
+    link: "https://github.com/users/confirmation/email_verification?token=abc123def456",
+    attachment: null,
+    type: "legit",
+    explanation: "This email checks out. The sender is @github.com (legitimate), the tone is calm with no threats, the link points to github.com, and it tells you to ignore it if you didn't sign up — no panic.",
+    flags: []
+  },
+  {
+    id: 3,
+    from_name: "IT Help Desk",
+    from_addr: "helpdesk@company-itdesk.support",
+    to: "all-staff@yourcompany.com",
+    subject: "ACTION REQUIRED: Password expires tonight",
+    body: `Dear Employee,
+
+Your network password will expire at midnight tonight. You MUST reset it immediately or you will be locked out of all company systems including email, VPN and payroll.
+
+Reset your password NOW using your current credentials:`,
+    link: "http://company-passwordreset.support/reset?ref=urgent2024",
+    attachment: null,
+    type: "phish",
+    explanation: "Red flags everywhere: the domain 'company-itdesk.support' is not your company's real domain. Legitimate IT departments send from official company addresses. The ALL-CAPS urgency, after-hours threat, and suspicious reset URL are classic social engineering.",
+    flags: ["Third-party domain, not company email", "Extreme urgency (MUST, NOW)", "Suspicious reset link URL", "Broad mass email to all-staff"]
+  },
+  {
+    id: 4,
+    from_name: "Amazon",
+    from_addr: "shipment-tracking@amazon.com",
+    to: "you@example.com",
+    subject: "Your Amazon order has shipped",
+    body: `Hello,
+
+Your order #113-4829204-1920374 has been shipped and is on its way!
+
+Estimated delivery: Tuesday, via Amazon Logistics.
+
+You can track your package using the link in your Amazon account. Simply log in at amazon.com and go to Your Orders.
+
+Thank you for shopping with Amazon.`,
+    link: null,
+    attachment: null,
+    type: "legit",
+    explanation: "This is a legitimate shipping notification. The sender is @amazon.com, it references a real-looking order number, directs you to go to amazon.com directly (not a click-through link), and doesn't ask for any credentials or personal info.",
+    flags: []
+  },
+  {
+    id: 5,
+    from_name: "Microsoft Account Team",
+    from_addr: "account-security@microsofft-online.net",
+    to: "you@example.com",
+    subject: "Unusual sign-in activity detected on your Microsoft account",
+    body: `We detected a sign-in to your Microsoft account from an unrecognized device.
+
+Location: Lagos, Nigeria
+Device: Unknown Windows PC
+Time: Today, 3:47 AM
+
+If this wasn't you, your account may be compromised. Please verify your identity and secure your account immediately:`,
+    link: "https://microsofft-online.net/account/verify-identity?session=X9f2kA",
+    attachment: null,
+    type: "phish",
+    explanation: "'microsofft-online.net' has a double-F typo and is not Microsoft's domain. Microsoft uses microsoft.com or account.microsoft.com. The fear tactic of a foreign sign-in is a very common phishing technique to bypass rational thinking.",
+    flags: ["Typo in domain (microsofft)", "Link not on microsoft.com", "Geographic fear tactic", "Urgency to act immediately"]
+  },
+  {
+    id: 6,
+    from_name: "Netflix",
+    from_addr: "info@netflix.com",
+    to: "you@example.com",
+    subject: "Update your payment method",
+    body: `Hi there,
+
+We're having trouble processing your payment for the next billing cycle.
+
+To keep your membership active, please update your payment information at your earliest convenience.
+
+You can update your billing details at netflix.com/account — just sign in and select 'Membership & Billing.'
+
+If you have questions, visit our Help Center at help.netflix.com.`,
+    link: null,
+    attachment: null,
+    type: "legit",
+    explanation: "Legitimate Netflix email. Sent from @netflix.com, uses soft language ('at your earliest convenience'), and crucially directs you to navigate to netflix.com yourself rather than clicking an embedded link. No threats or excessive urgency.",
+    flags: []
+  },
+  {
+    id: 7,
+    from_name: "DHL Express",
+    from_addr: "parcel-notification@dhl-tracking-service.com",
+    to: "you@example.com",
+    subject: "Your parcel is waiting — customs fee required",
+    body: `Dear Recipient,
+
+Your parcel (Tracking: DHL7392019284) is being held at our customs facility. A small customs clearance fee of $3.50 is required before we can release it for delivery.
+
+Please pay within 48 hours to avoid your parcel being returned.
+
+Payment method: credit/debit card via our secure portal.`,
+    link: "http://dhl-customs-clearance.com/pay?ref=7392019284",
+    attachment: null,
+    type: "phish",
+    explanation: "DHL's official domain is dhl.com, not 'dhl-tracking-service.com'. The 'small customs fee' is one of the most common phishing lures — once attackers have your card details for $3.50, they can charge anything. The link also goes to an unrelated domain.",
+    flags: ["Non-official DHL domain", "Small fee request = card harvesting", "Payment link on unknown domain", "48-hour deadline pressure"]
+  },
+  {
+    id: 8,
+    from_name: "Google",
+    from_addr: "no-reply@accounts.google.com",
+    to: "you@example.com",
+    subject: "Security alert: New sign-in on Chrome",
+    body: `We noticed a new sign-in to your Google Account on a Windows device.
+
+If this was you: No further action is required.
+
+If you don't recognize this activity: Review your account activity at myaccount.google.com/notifications.
+
+You received this email to let you know about important activity on your account. © 2024 Google LLC, 1600 Amphitheatre Pkwy, Mountain View, CA 94043`,
+    link: null,
+    attachment: null,
+    type: "legit",
+    explanation: "This is a genuine Google security notification. The sender is accounts.google.com, it offers no scary ultimatum, and the review link is clearly myaccount.google.com — typed out rather than hidden behind a button. Google includes their real address.",
+    flags: []
+  },
+  {
+    id: 9,
+    from_name: "HR Department",
+    from_addr: "hr-payroll@yourcompany-salaries.net",
+    to: "you@example.com",
+    subject: "Important: Review your updated salary slip",
+    body: `Dear Employee,
+
+Please find attached your updated salary slip for this month. There have been some adjustments made to your compensation package.
+
+Kindly review the document and confirm receipt by clicking the link below. If you notice any discrepancies, contact HR immediately.`,
+    link: "http://hrportal-documents.net/download/payslip?emp=10482",
+    attachment: "Salary_Slip_Updated.zip",
+    type: "phish",
+    explanation: "Your HR department would use your company's real email domain, not 'yourcompany-salaries.net'. The ZIP attachment is a major red flag — malware is frequently delivered this way. Legitimate payslips come through official HR systems, not random links.",
+    flags: ["Non-company sender domain", "Suspicious .zip attachment", "Unknown download portal link", "Sensitive topic (salary) used as lure"]
+  },
+  {
+    id: 10,
+    from_name: "Spotify",
+    from_addr: "no-reply@spotify.com",
+    to: "you@example.com",
+    subject: "Your receipt from Spotify",
+    body: `Hi there,
+
+Thanks for your Premium subscription renewal.
+
+Plan: Individual Premium
+Amount charged: $9.99
+Billing date: Today
+Next billing date: Same date next month
+
+If you have questions about this charge, visit spotify.com/account or contact our support team at support.spotify.com.
+
+This is an automated message — please do not reply to this email.`,
+    link: null,
+    attachment: null,
+    type: "legit",
+    explanation: "A routine billing receipt from @spotify.com. It provides specific, accurate-looking billing details, links only to spotify.com and support.spotify.com, and makes no requests. Receipts like this are entirely normal and this one has no red flags.",
+    flags: []
+  }
+];
+
+let current = 0;
+let answers = [];
+let score   = 0;
+let answered = false;
+
+function showTab(t) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + t).classList.add('active');
+  event.currentTarget.classList.add('active');
+}
+
+function startSimulator() {
+  resetSimulator(true);
+  document.querySelectorAll('.tab-btn')[1].click();
+}
+
+function resetSimulator(soft) {
+  current  = 0;
+  answers  = [];
+  score    = 0;
+  answered = false;
+  document.getElementById('liveScore').textContent = '0';
+  document.getElementById('scorePill').style.display = 'none';
+  renderEmail();
+  if (!soft) {
+    document.querySelectorAll('.tab-btn')[1].click();
+  }
+}
+
+function renderEmail() {
+  const e = EMAILS[current];
+  answered = false;
+
+  document.getElementById('progressLabel').textContent = `Email ${current + 1} of ${EMAILS.length}`;
+  document.getElementById('progressFill').style.width  = ((current + 1) / EMAILS.length * 100) + '%';
+
+  let bodyHtml = e.body.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  let extra = '';
+  if (e.link) {
+    extra += `<br><a class="email-link" onclick="return false">${e.link}</a>`;
+  }
+  if (e.attachment) {
+    extra += `<div class="email-attachment">📎 ${e.attachment}</div>`;
+  }
+
+  document.getElementById('emailDisplay').innerHTML = `
+    <div class="email-card">
+      <div class="email-header">
+        <div class="email-subject">${e.subject}</div>
+        <div class="email-meta">
+          <span class="label">From:</span>
+          <span class="value">${e.from_name} &lt;${e.from_addr}&gt;</span>
+          <span class="label">To:</span>
+          <span class="value">${e.to}</span>
+        </div>
+      </div>
+      <div class="email-body">${bodyHtml}${extra}</div>
+    </div>`;
+
+  document.getElementById('feedbackBox').className = 'feedback-box';
+  document.getElementById('btnPhish').disabled = false;
+  document.getElementById('btnLegit').disabled = false;
+}
+
+function answer(choice) {
+  if (answered) return;
+  answered = true;
+
+  const e = EMAILS[current];
+  const correct = (choice === e.type);
+  if (correct) score++;
+
+  answers.push({ email: e, choice, correct });
+
+  document.getElementById('btnPhish').disabled = true;
+  document.getElementById('btnLegit').disabled = true;
+
+  const fb     = document.getElementById('feedbackBox');
+  const verdict = document.getElementById('feedbackVerdict');
+  const detail  = document.getElementById('feedbackDetail');
+  const flags   = document.getElementById('redFlags');
+  const nextBtn = document.getElementById('nextBtn');
+
+  fb.className = 'feedback-box show ' + (correct ? 'correct' : 'wrong');
+  verdict.className = 'feedback-verdict ' + (correct ? 'correct' : 'wrong');
+
+  if (correct) {
+    verdict.textContent = '✓ Correct!';
+  } else {
+    verdict.textContent = '✗ Incorrect — ' + (e.type === 'phish' ? "This was a phishing email." : "This was actually legitimate.");
+  }
+
+  detail.textContent = e.explanation;
+
+  flags.innerHTML = '';
+  if (e.flags.length) {
+    flags.innerHTML = '<div style="font-size:12px;color:var(--muted);margin-bottom:6px;margin-top:8px;width:100%;">Red flags:</div>';
+    e.flags.forEach(f => {
+      const span = document.createElement('span');
+      span.className = 'flag-tag';
+      span.textContent = '⚠ ' + f;
+      flags.appendChild(span);
+    });
+  }
+
+  nextBtn.textContent = current < EMAILS.length - 1 ? 'Next Email →' : 'See My Results →';
+
+  document.getElementById('liveScore').textContent = score;
+  document.getElementById('scorePill').style.display = 'flex';
+}
+
+function nextEmail() {
+  current++;
+  if (current >= EMAILS.length) {
+    showResults();
+    return;
+  }
+  renderEmail();
+}
+
+function showResults() {
+  const pct = Math.round(score / EMAILS.length * 100);
+  const wrong = EMAILS.length - score;
+
+  document.getElementById('finalScore').textContent = score;
+  document.getElementById('statCorrect').textContent = score;
+  document.getElementById('statWrong').textContent   = wrong;
+  document.getElementById('statPct').textContent     = pct + '%';
+
+  const arc = document.getElementById('ringArc');
+  const circ = 2 * Math.PI * 58;
+  setTimeout(() => {
+    arc.style.strokeDashoffset = circ - (circ * score / EMAILS.length);
+    if (pct >= 90) arc.style.stroke = 'var(--success)';
+    else if (pct >= 60) arc.style.stroke = 'var(--accent2)';
+    else arc.style.stroke = 'var(--danger)';
+  }, 100);
+
+  let msg, sub;
+  if (pct === 100) { msg = "Perfect score! 🏆"; sub = "You spotted every phishing attempt. You're a human firewall."; }
+  else if (pct >= 80) { msg = "Great work! 🎯"; sub = "You caught most of the threats. Review the ones you missed below."; }
+  else if (pct >= 60) { msg = "Not bad, keep learning 📚"; sub = "You're developing a good eye. Read the feedback below to sharpen your skills."; }
+  else { msg = "Needs improvement ⚠️"; sub = "Don't worry — awareness is the first step. Review the training section and try again."; }
+
+  document.getElementById('scoreMsg').textContent = msg;
+  document.getElementById('scoreSub').textContent = sub;
+
+  const reviewList = document.getElementById('reviewList');
+  reviewList.innerHTML = '';
+  answers.forEach(a => {
+    const icon = a.correct ? '✅' : '❌';
+    const badge = `<span class="badge ${a.email.type}">${a.email.type === 'phish' ? '🎣 Phishing' : '✔ Legit'}</span>`;
+    reviewList.innerHTML += `
+      <div class="review-item">
+        <div class="review-icon">${icon}</div>
+        <div>
+          <div class="review-subject">${a.email.subject} ${badge}</div>
+          <div class="review-note">${a.email.explanation}</div>
+        </div>
+      </div>`;
+  });
+
+  document.querySelectorAll('.tab-btn')[2].click();
+}
+
+renderEmail();
+</script>
+</body>
+</html>
